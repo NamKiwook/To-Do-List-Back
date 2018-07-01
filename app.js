@@ -8,11 +8,24 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
+var mongoose = require('mongoose');
+var connectHistory = require('connect-history-api-fallback');
+
+var mongoUrl = 'mongodb://localhost:27017/todo';
+
+mongoose.Promise = global.Promise;
+mongoose.connect(mongoUrl);
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function(){
+  console.log('mongodb connection OK.');
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+//app.use(connectHistory());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
