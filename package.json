@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "nodemon ./bin/www --exec \"npm run lint && node\"",
     "start": "node ./bin/www",
-    "lint": "eslint --fix ./routes/*.js"
+    "lint": "eslint --fix ./routes/*.js",
+    "test": "mocha ./test/*.spec.js"
   },
   "dependencies": {
     "chai": "^4.1.2",

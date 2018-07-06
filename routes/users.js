@@ -18,7 +18,6 @@ let signUpAccount = async function(req,res) {
     let account = await user.save()
     res.status(200).send({userName: account.userName, userEmail: account.userEmail})
   } catch (err) {
-    console.log(err)
     res.status(400).send({errorMessage: err.message})
   }
 }
