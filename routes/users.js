@@ -3,28 +3,41 @@ let jwt = require('jsonwebtoken')
 let router = express.Router()
 let userSchema = require('../models/user')
 
-let signUpAccount = function(req,res,next) {
-  let user = new userSchema({
-		username : req.body.username,
-		userEmail : req.body.userEmail,
-		password : req.body.password
-	})
+let signUpAccount = async function(req,res) {
+  if(!req.body.userEmail || !req.body.password || !req.body.userName) {
+    res.status(400).send({errorMessage : 'Not Filled'})
+    return
+  }
 
-	user.save().then(() => {
-		console.log('saved')
-		res.status(200).send()
-	}).catch((err) => {
-		console.log(err)
-		res.status(400).send({errorMessage : err})
-	})
-
-  next()
+  try {
+    let user = new userSchema({
+      userName: req.body.userName,
+      userEmail: req.body.userEmail,
+      password: req.body.password
+    })
+    let account = await user.save()
+    res.status(200).send({userName: account.userName, userEmail: account.userEmail})
+  } catch (err) {
+    console.log(err)
+    res.status(400).send({errorMessage: err.message})
+  }
 }
 
 let authToken = async function(req, res) {
+  if(!req.body.userEmail || !req.body.password) {
+    res.status(400).send({errorMessage : 'Not Filled'})
+    return
+  }
+
 	try {
 		let user = await userSchema.findOne({userEmail: req.body.userEmail, password: req.body.password})
-		let userToken = await jwt.sign(
+
+    if(!user) {
+      res.status(400).send({errorMessage : 'Not User'})
+      return
+    }
+
+    let userToken = await jwt.sign(
 			{
 				userEmail : user.userEmail
 			},
@@ -35,8 +48,7 @@ let authToken = async function(req, res) {
 		)
 		res.status(200).send({token: userToken})
 	} catch(err) {
-		console.log(err)
-		res.status(400).send({errorMessage : err})
+		res.status(400).send({errorMessage : err.message})
 	}
 }
 
