@@ -1,22 +1,27 @@
 let httpMocks = require('node-mocks-http')
 let chai = require('chai')
-let user = require('../routes/users')
+let user = require('../routes/user')
 let sinon = require('sinon')
 let userSchema = require('../models/user')
 
 chai.should()
 
-let req
-let res
-
-
 describe('User', function () {
+  let req
+  let res
+  let expect = {
+    userName: 'nam',
+    userEmail: 'listenme1@naver.com',
+    password: '123'
+  }
 	beforeEach(function () {
 		req = httpMocks.createRequest()
 		res = httpMocks.createResponse()
 	})
 
-	describe('signUpAccount() Test', function () {
+
+
+	describe('Post User', function () {
 		let save
     beforeEach(function () {
 			save = sinon.stub(userSchema.prototype,'save')
@@ -25,36 +30,31 @@ describe('User', function () {
 			save.restore()
     })
 		it('정상적인 작동',async function () {
-      save.resolves({userName: 'nam', userEmail: 'listenme1@naver.com', password: '123'})
-			req.body.userName = 'nam'
-			req.body.userEmail = 'listenme1@naver.com'
-			req.body.password = '123'
+      save.resolves(expect)
+      req.body = expect
 			await user.signUpAccount(req,res)
       res.statusCode.should.equal(200)
-			res._getData().should.property('userName')
-      res._getData().should.property('userEmail')
-
+			res._getData().should.property('userName').equal(expect.userName)
+      res._getData().should.property('userEmail').equal(expect.userEmail)
     })
 
     it('입력값 부족', async function () {
-      save.resolves({userName: 'nam', userEmail: 'listenme1@naver.com', password: '123'})
+      save.resolves(expect)
       await user.signUpAccount(req,res)
       res.statusCode.should.equal(400)
       res._getData().should.property('errorMessage').equal('Not Filled')
     })
 
     it('DB 실패',async function () {
-      save.throws()
-      req.body.userName = 'nam'
-      req.body.userEmail = 'listenme1@naver.com'
-      req.body.password = '123'
+      save.throws('MongoError','DB ERROR')
+      req.body = expect
       await user.signUpAccount(req,res)
-      res.statusCode.should.equal(400)
+      res.statusCode.should.equal(503)
       res._getData().should.property('errorMessage')
     })
 	})
 
-	describe('authToken() Test', function () {
+	describe('Post User\'s Token', function () {
     let findOne
     beforeEach(function () {
       findOne = sinon.stub(userSchema,'findOne')
@@ -64,9 +64,11 @@ describe('User', function () {
     })
 
 		it('정상적인 작동', async function () {
-      findOne.resolves({userName : 'nam', userEmail : 'listenme1@naver.com', password : '123'})
-      req.body.userEmail = 'listenme1@naver.com'
-      req.body.password = '123'
+      findOne.resolves(expect)
+      req.body = {
+        userEmail: expect.userEmail,
+        password: expect.password
+      }
       await user.authToken(req,res)
       res.statusCode.should.equal(200)
       res._getData().should.property('token')
@@ -74,26 +76,30 @@ describe('User', function () {
 
     it('검색 실패', async function () {
       findOne.resolves(null)
-      req.body.userEmail = 'listenme1@naver.com'
-      req.body.password = '123'
+      req.body = {
+        userEmail: expect.userEmail,
+        password: expect.password
+      }
       await user.authToken(req,res)
       res.statusCode.should.equal(400)
       res._getData().should.property('errorMessage').equal('Not User')
     })
 
     it('입력값 부족', async function () {
-      findOne.resolves({userName : 'nam', userEmail : 'listenme1@naver.com', password : '123'})
+      findOne.resolves(expect)
       await user.authToken(req,res)
       res.statusCode.should.equal(400)
       res._getData().should.property('errorMessage').equal('Not Filled')
     })
 
     it('DB 실패', async function () {
-      findOne.throws()
-      req.body.userEmail = 'listenme1@naver.com'
-      req.body.password = '123'
+      findOne.throws('MongoError','DB ERROR')
+      req.body = {
+        userEmail: expect.userEmail,
+        password: expect.password
+      }
       await user.authToken(req,res)
-      res.statusCode.should.equal(400)
+      res.statusCode.should.equal(503)
       res._getData().should.property('errorMessage')
     })
 	})
