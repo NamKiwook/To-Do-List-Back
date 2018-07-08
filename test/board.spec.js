@@ -14,6 +14,7 @@ describe('board', function () {
   beforeEach (function () {
     req = httpMocks.createRequest()
     res = httpMocks.createResponse()
+    req.decoded = {userEamil : 'listenme1@naver.com'}
   })
 
   describe('보드의 내용 불러오기', function () {
@@ -80,8 +81,9 @@ describe('board', function () {
 
     it('정상적인 작동', async function () {
       save.resolves(expect)
-      userUpdate.resolve()
-      req.body = expect
+      userUpdate.resolves({})
+      req.body.name = expect.name
+      req.body.card = expect.card
       await board.createBoard(req, res)
       res.statusCode.should.equal(200)
       res._getData().should.property('name').equal(expect.name)
@@ -90,7 +92,7 @@ describe('board', function () {
 
     it('입력값 부족', async function () {
       save.resolves(expect)
-      userUpdate.resolve()
+      userUpdate.resolves()
       await board.createBoard(req, res)
       res.statusCode.should.equal(400)
       res._getData().should.property('errorMessage').equal('Not Filled')
@@ -98,7 +100,7 @@ describe('board', function () {
 
     it('보드 DB 실패', async function () {
       save.throws('MongoError','DB ERROR')
-      userUpdate.resolve()
+      userUpdate.resolves()
       req.body = expect
       await board.createBoard(req, res)
       res.statusCode.should.equal(503)
@@ -137,28 +139,31 @@ describe('board', function () {
       markModified.restore()
     })
     it('정상적인 작동', async function () {
-      findById.resolves({name: 'board3', card: []})
-      save.resolves({name: 'boaed4', card: []})
+      findById.resolves(new boardSchema({name: 'board3', card: []}))
+      save.resolves(new boardSchema(expect))
       markModified.resolves()
+      req.body = expect
       req.body.boardId = boardId
       await board.modifyBoard(req,res)
       res.statusCode.should.equal(200)
       res._getData().should.property('name').equal(expect.name)
-      res._getData().should.property('card').equal(expect.card)
+      res._getData().should.property('card')
     })
 
     it('해당 ID가 없음',async function () {
-      findById.resolves(null)
-      save.resolves({name: 'boaed4', card: []})
+      findById.resolves()
+      save.resolves(new boardSchema(expect))
       markModified.resolves()
+      req.body = expect
+      req.body.boardId = boardId
       await board.modifyBoard(req,res)
       res.statusCode.should.equal(400)
       res._getData().should.property('errorMessage').equal('Not Board')
     })
 
     it('입력값 부족', async function () {
-      findById.resolves({name: 'board3', card: []})
-      save.resolves({name: 'boaed4', card: []})
+      findById.resolves(new boardSchema({name: 'board3', card: []}))
+      save.resolves(new boardSchema(expect))
       markModified.resolves()
       await board.modifyBoard(req,res)
       res.statusCode.should.equal(400)
@@ -167,8 +172,9 @@ describe('board', function () {
 
     it('검색 DB 실패', async function () {
       findById.throws('MongoError','DB ERROR')
-      save.resolves({name: 'boaed4', card: []})
+      save.resolves(new boardSchema(expect))
       markModified.resolves()
+      req.body = expect
       req.body.boardId = boardId
       await board.modifyBoard(req,res)
       res.statusCode.should.equal(503)
@@ -176,9 +182,10 @@ describe('board', function () {
     })
 
     it('저장 DB 실패', async function () {
-      findById.resolves({name: 'board3', card: []})
+      findById.resolves(new boardSchema({name: 'board3', card: []}))
       save.throws('MongoError','DB ERROR')
       markModified.resolves()
+      req.body = expect
       req.body.boardId = boardId
       await board.modifyBoard(req,res)
       res.statusCode.should.equal(503)
@@ -193,12 +200,13 @@ describe('board', function () {
 
     beforeEach (function () {
       deleteOne = sinon.stub(boardSchema,'deleteOne')
-      userUpdate = sinon.stub(userSchema, 'update')
+      userUpdate = sinon.stub(userSchema, 'updateOne')
       boardId = 1
     })
 
     afterEach (function () {
       deleteOne.restore()
+      userUpdate.restore()
     })
 
     it('정상적인 작동', async function () {

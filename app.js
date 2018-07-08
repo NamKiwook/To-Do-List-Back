@@ -5,6 +5,7 @@ var cookieParser = require('cookie-parser')
 var logger = require('morgan')
 
 var userController = require('./routes/user')
+var boardController = require('./routes/board')
 
 var app = express()
 var mongoose = require('mongoose')
@@ -34,15 +35,16 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 //Routing
 //Get
-app.get('/api/board')
+app.get('/api/board',boardController.loadBoard)
 //Post
-app.post('/api/board')
 app.post('/api/user', userController.signUpAccount)
 app.post('/api/user/token', userController.authToken)
+app.post('/api/board',boardController.createBoard)
+
 //Put
-app.put('/api/board')
+app.put('/api/board',boardController.modifyBoard)
 //Delete
-app.delete('/api/board')
+app.delete('/api/board',boardController.deleteBoard)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
