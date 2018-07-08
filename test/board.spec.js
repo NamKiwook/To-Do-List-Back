@@ -38,7 +38,7 @@ describe('board', function () {
     })
 
     it('해당 ID가 없음',async function () {
-      findById.resolves({})
+      findById.resolves(null)
       req.query.boardId = boardId
       await board.loadBoard(req,res)
       res.statusCode.should.equal(400)
@@ -148,7 +148,7 @@ describe('board', function () {
     })
 
     it('해당 ID가 없음',async function () {
-      findById.resolves({})
+      findById.resolves(null)
       save.resolves({name: 'boaed4', card: []})
       markModified.resolves()
       await board.modifyBoard(req,res)

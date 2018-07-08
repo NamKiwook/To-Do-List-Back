@@ -1,7 +1,7 @@
 let jwt = require('jsonwebtoken')
 let userSchema = require('../models/user')
 
-let signUpAccount = async function(req,res) {
+let signUpAccount = async (req,res) => {
   try {
     if (!req.body.userEmail || !req.body.password || !req.body.userName) throw new Error('Not Filled')
     let user = new userSchema({
@@ -17,7 +17,7 @@ let signUpAccount = async function(req,res) {
   }
 }
 
-let authToken = async function(req, res) {
+let authToken = async (req, res) => {
 	try {
     if(!req.body.userEmail || !req.body.password) throw new Error('Not Filled')
 
@@ -39,7 +39,4 @@ let authToken = async function(req, res) {
     else res.status(400).send({errorMessage: err.message})	}
 }
 
-module.exports = {
-	signUpAccount: signUpAccount,
-	authToken: authToken
-}
+module.exports = {signUpAccount, authToken}
