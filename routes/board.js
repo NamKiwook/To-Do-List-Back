@@ -18,7 +18,7 @@ let createBoard = async (req, res) => {
     if(!req.body.name) throw new Error('Not Filled')
     let board = new boardSchema({name : req.body.name, card : req.body.card})
     board = await board.save()
-    await userSchema.updateOne({userEmail : req.body.userEmail}, {$push:{boards : board._id}})
+    await userSchema.updateOne({userEmail : req.decoded.userEmail}, {$push:{boards : board._id}})
     res.status(200).send(board)
   } catch (err) {
     if (err.name === 'MongoError') res.status(503).send({errorMessage: err.message})
@@ -49,7 +49,7 @@ let deleteBoard = async (req, res) => {
   try {
     if(!req.body.boardId) throw new Error('Not Filled')
     await boardSchema.deleteOne({_id : req.body.boardId})
-    await userSchema.updateOne({userEmail : req.body.userEmail}, {$pull:{boards : req.body.boardId}})
+    await userSchema.updateOne({userEmail : req.decoded.userEmail}, {$pull:{boards : req.body.boardId}})
     res.status(204).send()
   } catch (err){
     if (err.name === 'MongoError') res.status(503).send({errorMessage: err.message})

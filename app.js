@@ -32,13 +32,14 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
+app.use(userController.authorizeToken)
 
 //Routing
 //Get
 app.get('/api/board',boardController.loadBoard)
 //Post
 app.post('/api/user', userController.signUpAccount)
-app.post('/api/user/token', userController.authToken)
+app.post('/api/user/token', userController.login)
 app.post('/api/board',boardController.createBoard)
 
 //Put

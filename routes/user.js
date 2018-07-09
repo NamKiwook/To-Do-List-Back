@@ -17,7 +17,7 @@ let signUpAccount = async (req,res) => {
   }
 }
 
-let authToken = async (req, res) => {
+let login = async (req, res) => {
 	try {
     if(!req.body.userEmail || !req.body.password) throw new Error('Not Filled')
 
@@ -30,7 +30,7 @@ let authToken = async (req, res) => {
 			},
 			'NamKiWookBirthday1011',
 			{
-				expiresIn: '7d'
+				expiresIn: '1d'
 			}
 		)
 		res.status(200).send({token: userToken})
@@ -39,4 +39,18 @@ let authToken = async (req, res) => {
     else res.status(400).send({errorMessage: err.message})	}
 }
 
-module.exports = {signUpAccount, authToken}
+let authorizeToken = async (req, res, next) => {
+  try {
+    if(req.originalUrl === '/api/user' || req.originalUrl === '/api/user/token') return next()
+    const token = req.headers['token']
+    if (!token) throw new Error('Not Token')
+    let decodeToken = await jwt.verify(token, 'NamKiWookBirthday1011')
+    req.decoded = decodeToken
+    next()
+  } catch (err) {
+    if (err.name === 'MongoError') res.status(503).send({errorMessage: err.message})
+    else res.status(400).send({errorMessage: err.message})
+  }
+}
+
+module.exports = {signUpAccount, login, authorizeToken}
