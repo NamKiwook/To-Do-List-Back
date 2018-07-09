@@ -4,6 +4,8 @@ let chai = require('chai')
 let user = require('../routes/user')
 let sinon = require('sinon')
 let userSchema = require('../models/user')
+let util = require('util');
+
 
 chai.should()
 
@@ -68,7 +70,7 @@ describe('User', () => {
         userEmail: expect.userEmail,
         password: expect.password
       }
-      await user.authToken(req,res)
+      await user.login(req,res)
       res.statusCode.should.equal(200)
       res._getData().should.property('token')
     })
@@ -79,14 +81,14 @@ describe('User', () => {
         userEmail: expect.userEmail,
         password: expect.password
       }
-      await user.authToken(req,res)
+      await user.login(req,res)
       res.statusCode.should.equal(400)
       res._getData().should.property('errorMessage').equal('Not User')
     })
 
     it('입력값 부족', async () => {
       findOne.resolves(expect)
-      await user.authToken(req,res)
+      await user.login(req,res)
       res.statusCode.should.equal(400)
       res._getData().should.property('errorMessage').equal('Not Filled')
     })
@@ -97,7 +99,7 @@ describe('User', () => {
         userEmail: expect.userEmail,
         password: expect.password
       }
-      await user.authToken(req,res)
+      await user.login(req,res)
       res.statusCode.should.equal(503)
       res._getData().should.property('errorMessage')
     })
@@ -112,32 +114,36 @@ describe('User', () => {
         },
         'NamKiWookBirthday1011',
         {
-          expiresIn: '2'
+          expiresIn: '1000'
 
         }
       )
     })
-    it('인증된 사용자',  () => {
+    it('인증된 사용자', async () => {
       req.headers = {token : userToken}
-      user.decodeToken(req,res)
+      await user.authorizeToken(req,res)
       req.decoded.should.property('userEmail')
     })
     it('인증되지 않은 사용자', () => {
       req.headers = {token : '12312312312'}
-      user.decodeToken(req,res)
+      user.authorizeToken(req,res)
       res.statusCode.should.equal(400)
-      res._getData().should.property('errorMessage').equal('Not User')
+      res._getData().should.property('errorMessage').equal('jwt malformed')
     })
     it('token 값이 설정되지 않은 사용자', () => {
-      user.decodeToken(req,res)
+      user.authorizeToken(req,res)
       res.statusCode.should.equal(400)
       res._getData().should.property('errorMessage').equal('Not Token')
     })
 
     it('유효기간이 만료된 사용자', async () => {
-      await setTimeout(user.decodeToken(req, res), 3000)
+      let setTimeoutPromise = util.promisify(setTimeout)
+      req.headers = {token : userToken}
+      await setTimeoutPromise(1500).then(() => {
+        user.authorizeToken(req, res)
+      })
       res.statusCode.should.equal(400)
-      res._getData().should.property('errorMessage').equal('Token Expired')
+      res._getData().should.property('errorMessage').equal('jwt expired')
     })
   })
 
