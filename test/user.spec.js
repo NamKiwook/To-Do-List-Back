@@ -4,7 +4,7 @@ let chai = require('chai')
 let user = require('../routes/user')
 let sinon = require('sinon')
 let userSchema = require('../models/user')
-let util = require('util');
+let util = require('util')
 
 
 chai.should()
@@ -21,6 +21,38 @@ describe('User', () => {
 		req = httpMocks.createRequest()
 		res = httpMocks.createResponse()
 	})
+  describe('Get MyInfo', () => {
+    let findOne
+    beforeEach(async () => {
+      findOne = sinon.stub(userSchema, 'findOne')
+      req.decoded = {userEamil : expect.userEmail}
+    })
+    afterEach(() => {
+      findOne.restore()
+    })
+    it('정상적인 작동', async () => {
+      findOne.resolves(new userSchema(expect))
+      await user.getMyInfo(req,res)
+      res.statusCode.should.equal(200)
+      res._getData().should.property('userName',expect.userName)
+      res._getData().should.property('userEmail',expect.userEmail)
+      res._getData().should.not.property('password')
+      res._getData().should.deep.property('boards',[]).to.be.a('array')
+
+    })
+    it('회원탈퇴 후 유효한 Token만 남은 경우', async () => {
+      findOne.resolves(null)
+      await user.getMyInfo(req,res)
+      res.statusCode.should.equal(400)
+      res._getData().should.property('errorMessage','Not User')
+    })
+    it('DB에러', async () => {
+      findOne.throws('MongoError','DB ERROR')
+      await user.getMyInfo(req,res)
+      res.statusCode.should.equal(503)
+      res._getData().should.property('errorMessage')
+    })
+  })
 
 	describe('Post User', () => {
 		let save
@@ -31,19 +63,17 @@ describe('User', () => {
 			save.restore()
     })
 		it('정상적인 작동',async () => {
-      save.resolves(expect)
+      save.resolves(new userSchema(expect))
       req.body = expect
 			await user.signUpAccount(req,res)
-      res.statusCode.should.equal(200)
-			res._getData().should.property('userName').equal(expect.userName)
-      res._getData().should.property('userEmail').equal(expect.userEmail)
+      res.statusCode.should.equal(204)
     })
 
     it('입력값 부족', async () => {
-      save.resolves(expect)
+      save.resolves(new userSchema(expect))
       await user.signUpAccount(req,res)
       res.statusCode.should.equal(400)
-      res._getData().should.property('errorMessage').equal('Not Filled')
+      res._getData().should.property('errorMessage','Not Filled')
     })
 
     it('DB 실패',async () => {
@@ -65,14 +95,14 @@ describe('User', () => {
     })
 
 		it('정상적인 작동', async () => {
-      findOne.resolves(expect)
+      findOne.resolves(new userSchema(expect))
       req.body = {
         userEmail: expect.userEmail,
         password: expect.password
       }
       await user.login(req,res)
       res.statusCode.should.equal(200)
-      res._getData().should.property('token')
+      res._getData().should.property('token').a('string')
     })
 
     it('검색 실패', async () => {
@@ -83,14 +113,14 @@ describe('User', () => {
       }
       await user.login(req,res)
       res.statusCode.should.equal(400)
-      res._getData().should.property('errorMessage').equal('Not User')
+      res._getData().should.property('errorMessage','Not User')
     })
 
     it('입력값 부족', async () => {
-      findOne.resolves(expect)
+      findOne.resolves(new userSchema(expect))
       await user.login(req,res)
       res.statusCode.should.equal(400)
-      res._getData().should.property('errorMessage').equal('Not Filled')
+      res._getData().should.property('errorMessage','Not Filled')
     })
 
     it('DB 실패', async () => {
@@ -105,7 +135,7 @@ describe('User', () => {
     })
 	})
 
-  describe('사용자 인증', () => {
+  describe('Authorize Token', () => {
     let userToken
     beforeEach(async () => {
       userToken = await jwt.sign(
@@ -128,12 +158,12 @@ describe('User', () => {
       req.headers = {token : '12312312312'}
       user.authorizeToken(req,res)
       res.statusCode.should.equal(400)
-      res._getData().should.property('errorMessage').equal('jwt malformed')
+      res._getData().should.property('errorMessage','jwt malformed')
     })
     it('token 값이 설정되지 않은 사용자', () => {
       user.authorizeToken(req,res)
       res.statusCode.should.equal(400)
-      res._getData().should.property('errorMessage').equal('Not Token')
+      res._getData().should.property('errorMessage','Not Token')
     })
 
     it('유효기간이 만료된 사용자', async () => {
@@ -143,7 +173,7 @@ describe('User', () => {
         user.authorizeToken(req, res)
       })
       res.statusCode.should.equal(400)
-      res._getData().should.property('errorMessage').equal('jwt expired')
+      res._getData().should.property('errorMessage','jwt expired')
     })
   })
 

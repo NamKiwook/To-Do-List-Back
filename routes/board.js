@@ -33,13 +33,11 @@ let modifyBoard = async (req, res) => {
     if(!board) throw new Error('Not Board')
     board.name = req.body.name
     board.card = req.body.card
-    console.log(board)
     board.markModified('name')
     board.markModified('card')
     board = await board.save()
     res.status(200).send(board)
   } catch (err) {
-    console.log(err)
     if (err.name === 'MongoError') res.status(503).send({errorMessage: err.message})
     else res.status(400).send({errorMessage: err.message})
   }

@@ -1,6 +1,17 @@
 let jwt = require('jsonwebtoken')
 let userSchema = require('../models/user')
 
+let getMyInfo = async (req, res) => {
+  try {
+    let user = await userSchema.findOne({userEmail: req.decoded.userEmail})
+    if(!user) throw new Error('Not User')
+    res.status(200).send({userEmail: user.userEmail, userName: user.userName, boards: user.boards})
+  } catch (err) {
+    if (err.name === 'MongoError') res.status(503).send({errorMessage: err.message})
+    else res.status(400).send({errorMessage: err.message})
+  }
+}
+
 let signUpAccount = async (req,res) => {
   try {
     if (!req.body.userEmail || !req.body.password || !req.body.userName) throw new Error('Not Filled')
@@ -9,8 +20,8 @@ let signUpAccount = async (req,res) => {
       userEmail: req.body.userEmail,
       password: req.body.password
     })
-    let account = await user.save()
-    res.status(200).send({userName: account.userName, userEmail: account.userEmail})
+    await user.save()
+    res.status(204).send()
   } catch (err) {
     if (err.name === 'MongoError') res.status(503).send({errorMessage: err.message})
     else res.status(400).send({errorMessage: err.message})
@@ -53,4 +64,4 @@ let authorizeToken = async (req, res, next) => {
   }
 }
 
-module.exports = {signUpAccount, login, authorizeToken}
+module.exports = {getMyInfo, signUpAccount, login, authorizeToken}
