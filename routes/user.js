@@ -3,7 +3,7 @@ let userSchema = require('../models/user')
 
 let getMyInfo = async (req, res) => {
   try {
-    let user = await userSchema.findOne({userEmail: req.decoded.userEmail})
+    let user = await userSchema.findOne({userEmail: req.decoded.userEmail}).populate('boards', 'name')
     if(!user) throw new Error('Not User')
     res.status(200).send({userEmail: user.userEmail, userName: user.userName, boards: user.boards})
   } catch (err) {

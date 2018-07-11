@@ -36,6 +36,7 @@ app.use(userController.authorizeToken)
 
 //Routing
 //Get
+app.get('/api/me',userController.getMyInfo)
 app.get('/api/board',boardController.loadBoard)
 //Post
 app.post('/api/user', userController.signUpAccount)

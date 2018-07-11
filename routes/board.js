@@ -16,7 +16,7 @@ let loadBoard = async (req, res) => {
 let createBoard = async (req, res) => {
   try {
     if(!req.body.name) throw new Error('Not Filled')
-    let board = new boardSchema({name : req.body.name, card : req.body.card})
+    let board = new boardSchema({name : req.body.name})
     board = await board.save()
     await userSchema.updateOne({userEmail : req.decoded.userEmail}, {$push:{boards : board._id}})
     res.status(200).send(board)

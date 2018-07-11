@@ -3,7 +3,7 @@ var Schema = mongoose.Schema
 
 var userSchema = new Schema({
 	userName: {type : String, required: true},
-	boards: {type: [Schema.Types.ObjectId], default: []},
+	boards: [{type: Schema.Types.ObjectId, default: [], ref: 'board'}],
 	userEmail: {type: String, unique: true, required: true},
 	password: {type : String, required: true}
 })

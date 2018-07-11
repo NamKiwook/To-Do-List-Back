@@ -15,7 +15,9 @@ describe('User', () => {
   let expect = {
     userName: 'nam',
     userEmail: 'listenme1@naver.com',
-    password: '123'
+    password: '123',
+    boards:[{name: 'board1', card: [{name: 'card1', list: [{name: 'list1'},{name: 'list2'},{name: 'list3'}]},{name: 'card2', list: [{name: 'list1'},{name: 'list2'},{name: 'list3'}]}]},
+      {name: 'board4', card: [{name: 'card3', list: [{name: 'list4'},{name: 'list5'},{name: 'list6'}]},{name: 'card4', list: [{name: 'list4'},{name: 'list5'},{name: 'list6'}]}]}]
   }
 	beforeEach(() => {
 		req = httpMocks.createRequest()
@@ -30,18 +32,27 @@ describe('User', () => {
     afterEach(() => {
       findOne.restore()
     })
+
     it('정상적인 작동', async () => {
-      findOne.resolves(new userSchema(expect))
+      findOne.returns({
+        populate: () => {
+          let expectRes = new userSchema(expect)
+          expectRes._doc.boards = [{_id: 1, name: expect.boards[0].name}, {_id: 2, name: expect.boards[1].name}]
+          return expectRes
+        }
+      })
       await user.getMyInfo(req,res)
       res.statusCode.should.equal(200)
       res._getData().should.property('userName',expect.userName)
       res._getData().should.property('userEmail',expect.userEmail)
       res._getData().should.not.property('password')
-      res._getData().should.deep.property('boards',[]).to.be.a('array')
+      res._getData().should.deep.property('boards',[{_id: 1, name: expect.boards[0].name}, {_id: 2, name: expect.boards[1].name}]).to.be.a('array')
 
     })
     it('회원탈퇴 후 유효한 Token만 남은 경우', async () => {
-      findOne.resolves(null)
+      findOne.returns({
+        populate: () => null
+      })
       await user.getMyInfo(req,res)
       res.statusCode.should.equal(400)
       res._getData().should.property('errorMessage','Not User')

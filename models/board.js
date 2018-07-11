@@ -9,7 +9,7 @@ var cardSchema = {
 
 var boardSchema = new Schema({
 	name: String,
-	card: [cardSchema]
+	card: {type: [cardSchema], default: []}
 })
 
 module.exports = mongoose.model('board', boardSchema)
