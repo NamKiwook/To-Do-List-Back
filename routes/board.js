@@ -55,5 +55,4 @@ let deleteBoard = async (req, res) => {
   }
 }
 
-
 module.exports = {loadBoard, createBoard, modifyBoard, deleteBoard}
