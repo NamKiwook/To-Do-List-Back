@@ -5,7 +5,7 @@ files:
     destination: /home/ToDo/To-Do-List-Back
 hooks:
   BeforeInstall:
-    - location: /home/ToDo/To-Do-List-Back/script/npmInstall.sh
+    - location: ./home/ToDo/To-Do-List-Back/script/npmInstall.sh
       timeout: 300
-    - location: /home/ToDo/To-Do-List-Back/script/npmStart.sh
+    - location: ./home/ToDo/To-Do-List-Back/script/npmStart.sh
       timeout: 300
