@@ -14,9 +14,8 @@ deploy:
   secret_access_key: $AWS_SECRET_KEY
   local_dir: dpl_cd_upload
   skip_cleanup: true
-  on: &2
+  on:
     repo: NamKiwook/To-Do-List-Back
-    branch: master
   bucket: namtravis
   region: ap-northeast-2
 - provider: codedeploy
@@ -28,8 +27,8 @@ deploy:
   application: ToDo
   deployment_group: ToDoApplication
   region: ap-northeast-2
-  on: *2
-
+  on:
+    repo: NamKiwook/To-Do-List-Back
 script:
   - zip -r backLatest *
   - mkdir -p dpl_cd_upload
