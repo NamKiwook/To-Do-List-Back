@@ -4,5 +4,5 @@ files:
   - source: ./
     destination: /home/ToDo/To-Do-List-Back
 hooks:
-  - AfterInstall: /script/npmInstall.sh
+  - BeforeInstall: /script/npmInstall.sh
   - ApplicationStart: /script/npmStart.sh
