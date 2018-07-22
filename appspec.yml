@@ -2,4 +2,7 @@ version: 0.0
 os: linux
 files:
   - source: ./
-    destination: /home/ToDo/Back
+    destination: /home/ToDo/To-Do-List-Back
+hooks:
+  - AfterInstall: /script/npmInstall.sh
+  - ApplicationStart: /script/npmStart.sh

@@ -16,13 +16,14 @@ deploy:
   skip_cleanup: true
   on: &2
     repo: NamKiwook/To-Do-List-Back
+    branch: master
   bucket: namtravis
   region: ap-northeast-2
 - provider: codedeploy
   access_key_id: $AWS_ACCESS_KEY
   secret_access_key: $AWS_SECRET_KEY
   bucket: namtravis
-  key: latest.zip
+  key: backLatest.zip
   bundle_type: zip
   application: ToDo
   deployment_group: ToDoApplication
@@ -30,6 +31,6 @@ deploy:
   on: *2
 
 script:
-  - zip -r latest *
+  - zip -r backLatest *
   - mkdir -p dpl_cd_upload
-  - mv latest.zip dpl_cd_upload/latest.zip
+  - mv backLatest.zip dpl_cd_upload/backLatest.zip
