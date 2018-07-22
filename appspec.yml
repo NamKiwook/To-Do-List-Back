@@ -7,5 +7,6 @@ hooks:
   AfterInstall:
     - location: script/npmInstall.sh
       timeout: 300
+  ApplicationStart:
     - location: script/npmStart.sh
       timeout: 300
