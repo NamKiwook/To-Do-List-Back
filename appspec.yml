@@ -5,8 +5,11 @@ files:
     destination: /home/ToDo/To-Do-List-Back
 hooks:
   AfterInstall:
-    - location: script/npmInstall.sh
+    - location: script/install.sh
       timeout: 300
   ApplicationStart:
-    - location: script/npmStart.sh
+    - location: script/start.sh
+      timeout: 300
+  ApplicationStop:
+    - location: script/stop.sh
       timeout: 300

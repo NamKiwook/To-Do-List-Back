@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "nodemon ./bin/www --exec \"npm run lint && node\"",
     "start": "node ./bin/www",
+    "deploy": "pm2 start ./bin/www --name \"todo\"",
+    "stop": "pm2 stop todo || true",
     "lint": "eslint --fix ./routes/*.js",
     "test": "mocha ./test/*.spec.js"
   },
