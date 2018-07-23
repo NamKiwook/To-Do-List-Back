@@ -2,14 +2,17 @@ version: 0.0
 os: linux
 files:
   - source: ./
-    destination: /home/ToDo/To-Do-List-Back
+    destination: /home/ubuntu/To-Do-List-Back
 hooks:
   ApplicationStop:
     - location: script/stop.sh
       timeout: 300
+      runas: ubuntu
   AfterInstall:
     - location: script/install.sh
       timeout: 300
+      runas: ubuntu
   ApplicationStart:
     - location: script/start.sh
       timeout: 300
+      runas: ubuntu
