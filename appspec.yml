@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   - source: ./
-    destination: /home/ubuntu/To-Do-List-Back
+    destination: /home/ubuntu/To-Do/To-Do-List-Back
 hooks:
   ApplicationStop:
     - location: script/stop.sh

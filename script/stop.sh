@@ -1,2 +1,2 @@
-cd /home/ToDo/To-Do-List-Back
+cd /home/ubuntu/To-Do/To-Do-List-Back
 pm2 stop todo || true
