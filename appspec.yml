@@ -8,10 +8,6 @@ hooks:
     - location: script/stop.sh
       timeout: 300
       runas: ubuntu
-  AfterInstall:
-    - location: script/install.sh
-      timeout: 300
-      runas: ubuntu
   ApplicationStart:
     - location: script/start.sh
       timeout: 300
