@@ -1,2 +1,2 @@
 cd /home/ToDo/To-Do-List-Back
-npm run deploy
+pm2 start ./bin/www --name "todo"
