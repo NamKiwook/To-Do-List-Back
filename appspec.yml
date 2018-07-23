@@ -4,12 +4,12 @@ files:
   - source: ./
     destination: /home/ToDo/To-Do-List-Back
 hooks:
+  ApplicationStop:
+    - location: script/stop.sh
+      timeout: 300
   AfterInstall:
     - location: script/install.sh
       timeout: 300
   ApplicationStart:
     - location: script/start.sh
-      timeout: 300
-  ApplicationStop:
-    - location: script/stop.sh
       timeout: 300
